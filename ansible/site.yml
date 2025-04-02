@@ -1,0 +1,16 @@
+---
+- name: Configure Desktop Machine
+  hosts: localhost
+  become: true
+  vars:
+    package_cats:
+      - base
+      - development
+      - desktop
+
+  roles:
+    - role: basics
+    - role: dotfiles
+    - role: packages
+    - role: desktop_specific_role
+

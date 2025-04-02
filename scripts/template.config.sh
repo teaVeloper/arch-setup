@@ -1,0 +1,7 @@
+TARGET_DISK="/dev/nvme0n1"
+ENABLE_ENCRYPTION="no"
+MICROCODE="amd-ucode"
+SWAPFILE="no"
+HOSTNAME="Berti-Arch"
+USERNAME="berti"
+VIDEOCARD="amd"

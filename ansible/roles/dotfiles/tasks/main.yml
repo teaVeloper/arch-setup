@@ -1,0 +1,105 @@
+---
+# make zsh my login shell
+- name: Ensure Zsh is installed
+  ansible.builtin.package:
+    name: zsh
+    state: present
+
+- name: Change login shell to zsh for the current user
+  become: true
+  ansible.builtin.user: 
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh
+  # command: chsh -s /bin/zsh "{{ ansible_user_id }}"
+  when: set_zsh_as_login_shell and ansible_env.SHELL != '/usr/bin/zsh'
+
+# setup of antidote
+- name: Ensure yay is installed (Arch Linux)
+  community.general.pacman:
+    name: yay
+    state: present
+  when: ansible_distribution == "Archlinux"
+
+- name: Install antidote using yay (Arch Linux)
+  kewlfft.aur.aur:
+    name: antidote-git
+    state: present
+  when: ansible_distribution == "Archlinux"
+
+- name: Clone antidote repository (Non-Arch Linux)
+  ansible.builtin.git:
+    repo: https://github.com/mattmc3/antidote.git
+    dest: "{{ xdg_config_home }}/zsh/antidote"
+    update: yes
+  when: ansible_distribution != "Archlinux"
+
+
+# Symlink dotfiles
+- name: Check for existing files and symlink
+  block:
+    - name: Check if the destination exists
+      ansible.builtin.stat:
+        path: "{{ item.value.dest }}"
+      register: dest_exists
+      loop: "{{ dotfiles_to_symlink | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+# This task always results in errors.. so i skip it!
+    # - name: Backup existing files if they exist
+    #   command: mv "{{ item.value.dest }}" "{{ item.value.dest }}.bk"
+    #   when: dest_exists.results[loop.index0].stat.exists and not dest_exists.results[loop.index0].stat.islnk
+    #   loop: "{{ dotfiles_to_symlink | dict2items }}"
+    #   loop_control:
+    #     label: "{{ item.key }}"
+    #   ignore_errors: yes
+    #   check_mode: no
+
+    - name: Create directory if needed
+      ansible.builtin.file:
+        path: "{{ item.value.dest | dirname }}"
+        state: directory
+      when: item.value.create_folder | default(false)
+      loop: "{{ dotfiles_to_symlink | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: Symlink dotfiles
+      ansible.builtin.file:
+        src: "{{ item.value.src }}"
+        dest: "{{ item.value.dest }}"
+        state: link
+      loop: "{{ dotfiles_to_symlink | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+- name: Create zsh state dir
+  ansible.builtin.file:
+    path: "{{ xdg_state_home }}/zsh"
+    state: directory
+
+# Create the .profile file
+- name: Create .profile with XDG variables
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.profile"
+    content: |
+      export XDG_CONFIG_HOME="{{ xdg_config_home }}"
+      export XDG_DATA_HOME="{{ xdg_data_home }}"
+      export XDG_CACHE_HOME="{{ xdg_cache_home }}"
+      export XDG_STATE_HOME="{{ xdg_state_home }}"
+  when: ansible_env.SHELL.endswith('bash') or ansible_env.SHELL.endswith('zsh')
+
+- name: Decode email address
+  set_fact:
+    git_user_email: "{{ private_email_b64 | b64decode }}"
+
+- name: Create git-user file
+  copy:
+    dest: '{{ ansible_env.HOME }}/dotfiles/.private/git.user.conf'
+    content: |
+      [user]
+          name = {{ full_name }}
+          email = {{ git_user_email }}
+    mode: '0600'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"

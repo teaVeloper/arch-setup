@@ -1,0 +1,36 @@
+---
+- name: Symlink dotfiles
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop:
+    - { src: '/path/to/dotfiles/.bashrc', dest: '~/.bashrc' }
+    - { src: '/path/to/dotfiles/.vimrc', dest: '~/.vimrc' }
+    # Add more dotfiles as needed
+
+- name: Configure git with work email
+  template:
+    src: gitconfig_work.j2
+    dest: ~/.gitconfig
+
+- name: Configure encrypted secret storage
+  block:
+    - name: Install pass and gopass
+      pacman:
+        name:
+          - pass
+          - gopass
+        state: present
+
+    - name: Initialize pass store
+      command: pass init "your-gpg-id"
+      args:
+        creates: ~/.password-store
+
+- name: Set up environment variables
+  lineinfile:
+    path: ~/.bashrc
+    line: 'export VAR=value'
+    state: present
+

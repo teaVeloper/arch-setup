@@ -1,0 +1,34 @@
+---
+- name: Install Qtile
+  pacman:
+    name:
+      - qtile
+      - python-pip
+    state: present
+
+- name: Install Qtile dependencies
+  pip:
+    name:
+      - xcffib
+      - cairocffi
+    state: present
+
+- name: Configure Qtile
+  copy:
+    src: config.py
+    dest: ~/.config/qtile/config.py
+  notify: restart_qtile
+
+- name: Start Qtile with X session
+  shell: echo "exec qtile start" > ~/.xinitrc
+
+- name: Restart Qtile
+  systemd:
+    name: qtile
+    state: restarted
+  notify: restart_qtile
+
+handlers:
+  - name: restart_qtile
+    command: qtile-cmd -o cmd -f restart
+

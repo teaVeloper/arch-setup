@@ -1,0 +1,96 @@
+---
+
+- name: Ensure base-devel is installed (required for building AUR packages)
+  pacman:
+    name: base-devel
+    state: present
+  become: true
+
+- name: Install yay (AUR helper)
+  pacman:
+    name: yay
+    state: present
+  become: true
+
+- name: Install Zotero from AUR
+  community.general.pacman:
+    name: zotero-bin
+    state: present
+    use: yay
+  become: true
+
+- name: Install zotero-cli from AUR
+  community.general.pacman:
+    name: zotero-cli
+    state: present
+    use: yay
+  become: true
+
+- name: Ensure Zotero is run once to create profile
+  command: "xvfb-run zotero -P default --no-sandbox"
+  become: true
+  become_user: "{{ zotero_user }}"
+  args:
+    creates: "/home/{{ zotero_user }}/.zotero/zotero/Profiles"
+
+- name: Find Zotero profile directory
+  find:
+    paths: "/home/{{ zotero_user }}/.zotero/zotero/Profiles"
+    patterns: "*.default"
+    file_type: directory
+  register: zotero_profiles
+
+- name: Set Zotero profile path
+  set_fact:
+    zotero_profile_path: "{{ zotero_profiles.files[0].path }}"
+
+- name: Ensure extensions directory exists
+  file:
+    path: "{{ zotero_profile_path }}/extensions"
+    state: directory
+    owner: "{{ zotero_user }}"
+    group: "{{ zotero_user }}"
+
+- name: Download Zotero plugins
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ zotero_profile_path }}/extensions/{{ item.name }}.xpi"
+    owner: "{{ zotero_user }}"
+    group: "{{ zotero_user }}"
+  loop: "{{ zotero_plugins }}"
+  become: true
+  become_user: "{{ zotero_user }}"
+
+- name: Check if Zotero PDF directory exists
+  stat:
+    path: "{{ zotero_pdf_directory }}"
+  register: pdf_directory_stat
+
+- name: Fail if Zotero PDF directory does not exist
+  fail:
+    msg: "Zotero PDF directory '{{ zotero_pdf_directory }}' does not exist. Please ensure that your cloud storage is set up and mounted."
+  when: not pdf_directory_stat.stat.exists
+
+- name: Configure ZotFile preferences using zotero-cli
+  command: "zotero-cli config extensions.zotfile.location '{{ zotero_pdf_directory }}'"
+  become: true
+  become_user: "{{ zotero_user }}"
+  when: pdf_directory_stat.stat.exists
+
+- name: Enable ZotFile use of Zotero to rename
+  command: "zotero-cli config extensions.zotfile.useZoteroToRename true"
+  become: true
+  become_user: "{{ zotero_user }}"
+  when: pdf_directory_stat.stat.exists
+
+- name: Configure Zotero to use linked attachments
+  command: "zotero-cli config attachments.link_attachments true"
+  become: true
+  become_user: "{{ zotero_user }}"
+  when: pdf_directory_stat.stat.exists
+
+- name: Configure Zotero storage location
+  command: "zotero-cli config storage.base_dir '{{ zotero_pdf_directory }}'"
+  become: true
+  become_user: "{{ zotero_user }}"
+  when: pdf_directory_stat.stat.exists

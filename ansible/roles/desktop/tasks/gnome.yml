@@ -1,0 +1,16 @@
+---
+- name: Install GNOME
+  pacman:
+    name:
+      - gnome
+      - gnome-extra
+      - gnome-tweaks
+      - gnome-shell-extensions
+    state: present
+
+- name: Enable GDM service for GNOME
+  systemd:
+    name: gdm
+    enabled: true
+    state: started
+

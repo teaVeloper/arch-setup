@@ -1,0 +1,21 @@
+---
+# User who will run Zotero
+zotero_user: "{{ ansible_user }}"
+
+# List of Zotero plugins to install
+zotero_plugins:
+  - name: zotfile
+    url: "https://github.com/jlegewie/zotfile/releases/download/v5.1.2/zotfile-5.1.2-fx.xpi"
+  - name: better-bibtex
+    url: "https://github.com/retorquere/zotero-better-bibtex/releases/download/v6.7.240/zotero-better-bibtex-6.7.240.xpi"
+  - name: zutilo
+    url: "https://github.com/wshanks/Zutilo/releases/download/v3.10.0/zutilo.xpi"
+  - name: zotero-markdb-connect
+    url: "https://github.com/daeh/zotero-markdb-connect/releases/download/v0.1.1/mark-db-connect.xpi"
+  - name: zotxt
+    url: "https://github.com/egh/zotxt/releases/download/v7.0.0/zotxt-7.0.0.xpi"
+
+# Directory where Zotero should store PDFs
+# Update this to your actual PDF directory
+zotero_pdf_directory: "/home/{{ zotero_user }}/GoogleDrive/Zotero/PDFs"
+

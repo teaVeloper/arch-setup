@@ -1,0 +1,18 @@
+---
+- name: Install printing and scanning packages
+  community.general.pacman:
+    name: "{{ printing_scanning_packages }}"
+  become: true
+
+- name: Install printing and scanning packages (AUR)
+  kewlfft.aur.aur:
+    name: "{{ printing_scanning_aur_packages }}"
+    state: present
+    use: "{{ aur_helper }}"
+
+- name: Start systemd service - cups.socket
+  ansible.builtin.systemd:
+    name: cups.socket
+    state: started
+    enabled: yes
+  become: true

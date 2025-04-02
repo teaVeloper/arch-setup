@@ -1,0 +1,52 @@
+#!/bin/bash
+# configure.sh - Interactive configuration for your Arch install automation.
+# This script creates (or updates) a config file that other scripts will source.
+
+CONFIG_FILE="scripts/config.sh"
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+# A helper function to prompt for a value with a default.
+get_value() {
+    local varname="$1"
+    local default="$2"
+    shift 2
+    local prompt="$*"
+    # Display current value if set, otherwise default.
+    local current_val="${!varname:-$default}"
+    read -p "${prompt} [${current_val}]: " input
+    # Use input if provided; otherwise, current value/default.
+    echo "${input:-$current_val}"
+}
+
+# Prompt for basic configuration
+HOSTNAME=$(get_value HOSTNAME "arch" "Enter a hostname")
+USERNAME=$(get_value USERNAME "berti" "Enter a username")
+TARGET_DISK=$(get_value TARGET_DISK "/dev/nvme0n1" "Enter target disk")
+ENABLE_ENCRYPTION=$(get_value ENABLE_ENCRYPTION "no" "Enable disk encryption? (yes/no)")
+SWAPFILE=$(get_value SWAPFILE "no" "Enable swapfile? (yes/no)")
+VIDEOCARD=$(get_value VIDEOCARD "amd" "Enter your videocard type (amd/intel/nvidia)")
+
+# Auto-detect CPU vendor for microcode:
+if grep -q "GenuineIntel" /proc/cpuinfo; then
+    MICROCODE=$(get_value MICROCODE "intel-ucode" "Using Intel microcode by default")
+elif grep -q "AuthenticAMD" /proc/cpuinfo; then
+    MICROCODE=$(get_value MICROCODE "amd-ucode" "Using AMD microcode by default")
+else
+    echo "Unknown CPU vendor. Please specify microcode manually."
+    MICROCODE=$(get_value MICROCODE "intel-ucode" "Enter microcode package")
+fi
+
+# Save the configuration to file
+cat > "$CONFIG_FILE" <<EOF
+TARGET_DISK="$TARGET_DISK"
+ENABLE_ENCRYPTION="$ENABLE_ENCRYPTION"
+MICROCODE="$MICROCODE"
+SWAPFILE="$SWAPFILE"
+HOSTNAME="$HOSTNAME"
+USERNAME="$USERNAME"
+VIDEOCARD="$VIDEOCARD"
+EOF
+
+echo "Configuration saved to $CONFIG_FILE"

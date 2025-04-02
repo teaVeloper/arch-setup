@@ -1,0 +1,30 @@
+---
+# -- User configuration --
+user:
+  name: beri
+  full_name: "Bertold Sedlak"
+  primary_group: users
+  additional_groups: docker,wheel,render
+  shell: /bin/zsh
+  # See country list by running `reflector --list-countries`
+  country: "Austria"
+
+git:
+  private_email_b64: "YmVydGkuc2VkbGFrQGdtYWlsLmNvbQo"
+  work_email_b64: "YmVydG9sZC5zZWRsYWtAY3lhbnNlY3VyaXR5LmNvbQo"
+
+
+# how many parallel downloads to run at once
+pacman:
+  parallel_downloads: 10
+
+#  -- Services ---
+
+# if not using LVM, disable it
+# true or false
+disable_lvm: true
+
+# if not using systemd homed, disable it
+# true or false
+disable_systemd_homed: true
+

@@ -1,0 +1,95 @@
+---
+- name: Install input method and font pacma
+  become: True
+  community.general.pacman:
+    name: "{{ language_pacman }}"
+    state: present
+
+- name: Install language AUR packages
+  kewlfft.aur.aur:
+    name: "{{ language_aur }}"
+    state: present
+
+- name: Ensure /etc/locale.gen is configured
+  become: True
+  ansible.builtin.copy:
+    src: locale.gen
+    dest: /etc/locale.gen
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Generate locales
+  become: True
+  ansible.builtin.command: locale-gen
+  become: yes
+
+- name: Set system-wide locale
+  become: True
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: "^LANG="
+    line: "LANG=en_US.UTF-8"
+    state: present
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Set keyboard layout and language preferences
+  become: True
+  ansible.builtin.lineinfile:
+    path: /etc/vconsole.conf
+    regexp: "^KEYMAP="
+    line: "KEYMAP=us"
+    state: present
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Set Xorg keyboard layout for multiple languages (only if using Xorg)
+  block:
+    - name: Ensure .Xresources exists
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.Xresources"
+        state: touch
+
+    - name: Set Xorg keyboard layout
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.Xresources"
+        regexp: "^XkbLayout"
+        line: "XkbLayout us,de"
+        state: present
+
+    - name: Reload X resources
+      ansible.builtin.command: xrdb -merge ~/.Xresources
+  when: ansible_env.XDG_SESSION_TYPE == 'x11'
+
+- name: Enable and start ibus for input method handling
+  block:
+    - name: Enable ibus as default input method
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.xprofile"
+        create: yes
+        line: 'export GTK_IM_MODULE=ibus'
+        state: present
+
+    - name: Set up XMODIFIERS
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.xprofile"
+        create: yes
+        line: 'export XMODIFIERS=@im=ibus'
+        state: present
+
+    - name: Set up QT_IM_MODULE
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.xprofile"
+        create: yes
+        line: 'export QT_IM_MODULE=ibus'
+        state: present
+
+    - name: Start ibus daemon at session start
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.xprofile"
+        create: yes
+        line: 'ibus-daemon -drx'
+        state: present

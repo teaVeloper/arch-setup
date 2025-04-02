@@ -1,0 +1,11 @@
+---
+
+cloud_storage_user: "{{ ansible_user }}"
+
+google_drive_install: true
+dropbox_install: true
+tarsnap_install: true
+
+google_drive_mount_point: "/home/{{ cloud_storage_user }}/GoogleDrive"
+google_drive_config_dir: "/home/{{ cloud_storage_user }}/.gdfuse/default"
+

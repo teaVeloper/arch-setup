@@ -1,0 +1,15 @@
+---
+- name: Symlink essential dotfiles
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop:
+    - { src: '/path/to/dotfiles/.bashrc', dest: '~/.bashrc' }
+    # Minimal set of dotfiles
+
+- name: Configure git with personal email
+  template:
+    src: gitconfig_personal.j2
+    dest: ~/.gitconfig
+

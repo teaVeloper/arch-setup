@@ -1,0 +1,20 @@
+---
+- name: Install desktop environment
+  when: desktop == "gnome"
+  block:
+    - name: Install Gnome
+      community.general.pacman:
+        name:
+          - gnome
+          - gnome-shell
+          - gnome-control-center
+          - gdm
+          - xdg-desktop-portal-gnome
+        state: present
+      become: true
+
+    - name: Start systemd service - gdm.service
+      ansible.builtin.systemd:
+        name: gdm.service
+        enabled: yes
+      become: true

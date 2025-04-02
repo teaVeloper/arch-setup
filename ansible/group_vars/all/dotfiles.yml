@@ -1,0 +1,39 @@
+---
+# --- XDG Base Dirs ----
+xdg_config_home: "{{ ansible_env.HOME }}/.config"
+xdg_data_home: "{{ ansible_env.HOME }}/.local/share"
+xdg_cache_home: "{{ ansible_env.HOME }}/.cache"
+xdg_state_home: "{{ ansible_env.HOME }}/.local/state"
+
+set_zsh_as_login_shell: true  # Flag to control chsh command
+
+# -- dotfiles --
+dotfiles_to_symlink:
+  nvim:
+    src: "{{ playbook_dir }}/../dots/vi/nvim"
+    dest: "{{ xdg_config_home }}/nvim"
+  mise:
+    src: "{{ playbook_dir }}/../dots/mise"
+    dest: "{{ xdg_config_home }}/mise"
+  zsh:
+    src: "{{ playbook_dir }}/../dots/shell/zsh"
+    dest: "{{ xdg_config_home }}/zsh"
+  vimrc:
+    src: "{{ playbook_dir }}/../dots/vi/vim/vimrc"
+    dest: "{{ ansible_env.HOME }}/.vimrc"
+  # tmux:
+  #   src: "{{ playbook_dir }}/../dots/tmux/tmux.conf"
+  #   dest: "{{ xdg_config_home }}/tmux/tmux.conf"
+  #   create_folder: true  # Custom flag to indicate folder creation
+  kitty:
+    src: "{{ playbook_dir }}/../dots/kitty"
+    dest: "{{ xdg_config_home }}/kitty"
+  git:
+    src: "{{ playbook_dir }}/../dots/git"
+    dest: "{{ xdg_config_home }}/git"
+  ptpython:
+    src: "{{ playbook_dir }}/../dots/python/ptpython.config.py"
+    dest: "{{ xdg_config_home }}/ptpython/config.py"
+  less:
+    src: "{{ playbook_dir }}/../dots/lesskey"
+    dest: "{{ ansible_env.HOME }}/.lesskey"

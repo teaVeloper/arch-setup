@@ -1,0 +1,61 @@
+---
+- name: Install KVM and QEMU
+  pacman:
+    name:
+      - qemu
+      - virt-manager
+      - libvirt
+      - edk2-ovmf
+      - vde2
+    state: present
+
+- name: Enable libvirt service
+  systemd:
+    name: libvirtd
+    enabled: true
+    state: started
+
+- name: Add user to libvirt group
+  user:
+    name: "{{ ansible_user }}"
+    groups: libvirt
+    append: true
+
+- name: Install Vagrant and Packer
+  pacman:
+    name:
+      - vagrant
+      - packer
+    state: present
+
+- name: Install VirtualBox with support for running alongside KVM
+  pacman:
+    name: virtualbox
+    state: present
+
+- name: Enable VirtualBox kernel modules
+  shell: |
+    sudo modprobe vboxdrv
+    sudo modprobe vboxnetflt
+    sudo modprobe vboxnetadp
+  when: "'virtualbox' in ansible_facts.packages"
+
+- name: Install Docker and Podman
+  pacman:
+    name:
+      - docker
+      - podman
+    state: present
+
+- name: Enable Docker service
+  systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Install additional virtualization tools via AUR
+  yay:
+    name:
+      - vagrant-libvirt
+    state: present
+

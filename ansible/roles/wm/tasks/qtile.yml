@@ -1,0 +1,20 @@
+---
+- name: Install Qtile
+  pacman:
+    name:
+      - qtile
+      - python-pip
+      - xdotool
+      - picom
+      - feh
+      - rofi
+      - eww
+      - polybar
+    state: present
+
+- name: Install Qtile dependencies
+  pip:
+    name:
+      - xcffib
+      - cairocffi
+    state: present
