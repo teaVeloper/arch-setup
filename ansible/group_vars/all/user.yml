@@ -10,8 +10,7 @@ user:
   country: "Austria"
 
 git:
-  private_email_b64: "YmVydGkuc2VkbGFrQGdtYWlsLmNvbQo"
-  work_email_b64: "YmVydG9sZC5zZWRsYWtAY3lhbnNlY3VyaXR5LmNvbQo"
+  email_b64: "YmVydGkuc2VkbGFrQGdtYWlsLmNvbQo"
 
 
 # how many parallel downloads to run at once

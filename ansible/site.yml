@@ -6,11 +6,15 @@
     package_cats:
       - base
       - development
-      - desktop
+      - laptop
+      - computational-science
 
   roles:
-    - role: basics
-    - role: dotfiles
-    - role: packages
-    - role: desktop_specific_role
-
+    - role: 01_basics
+    - role: 02_packages
+    - role: 03_desktop
+    - role: 04_pass
+    - role: 05_bluetooth
+    - role: 06_peripherals
+    - role: 07_dotfiles
+    - role: 08_laptop
