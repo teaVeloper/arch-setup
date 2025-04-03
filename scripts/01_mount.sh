@@ -8,21 +8,6 @@ source "${SCRIPT_DIR}/common.sh"
 EFI_PART="${TARGET_DISK}p1"
 ROOT_PART="${TARGET_DISK}p2"
 
-if [ ! -b "$EFI_PART" ]; then
-    echo "Error: EFI partition ($EFI_PART) not found."
-    exit 1
-fi
-
-if [ ! -b "$ROOT_PART" ]; then
-    echo "Error: Root partition ($ROOT_PART) not found."
-    exit 1
-fi
-
-echo "Formatting EFI partition ($EFI_PART) as FAT32..."
-run_cmd "mkfs.fat -F32 -n EFI $EFI_PART"
-
-echo "Formatting root partition ($ROOT_PART) as Btrfs..."
-run_cmd "mkfs.btrfs -L ARCH $ROOT_PART"
 
 echo "Mounting root partition..."
 run_cmd "mount $ROOT_PART /mnt"

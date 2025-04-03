@@ -4,6 +4,10 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${SCRIPT_DIR}/common.sh"
 
+# Verify TARGET_DISK partitions exist (we expect p1 and p2)
+EFI_PART="${TARGET_DISK}p1"
+ROOT_PART="${TARGET_DISK}p2"
+
 # Verify target disk exists
 if [ ! -b "$TARGET_DISK" ]; then
     echo "Error: Target disk ${TARGET_DISK} does not exist."
@@ -44,5 +48,25 @@ run_cmd "sfdisk $TARGET_DISK <<EOF
 ,512M,U
 ,,L
 EOF"
+run_cmd "partprobe "$TARGET_DISK""
+
+
+if [ ! -b "$EFI_PART" ]; then
+    echo "Error: EFI partition ($EFI_PART) not found."
+    exit 1
+fi
+
+if [ ! -b "$ROOT_PART" ]; then
+    echo "Error: Root partition ($ROOT_PART) not found."
+    exit 1
+fi
+
+echo "Formatting EFI partition ($EFI_PART) as FAT32..."
+run_cmd "mkfs.fat -F32 -n EFI $EFI_PART"
+
+echo "Formatting root partition ($ROOT_PART) as Btrfs..."
+run_cmd "wipefs -a "$ROOT_PART""
+
+run_cmd "mkfs.btrfs -L ARCH $ROOT_PART"
 
 echo "Partitioning complete. Verify with lsblk or fdisk -l."
