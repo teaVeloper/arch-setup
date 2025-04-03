@@ -31,6 +31,11 @@ You will find more documentation in [docs](docs) where I include a manual guid o
 
 ## Usage
 
+0. **Bootstrap**
+```bash
+curl -s https://raw.githubusercontent.com/teaveloper/arch-setup/main/bootstrap.sh | bash
+```
+
 1. **Preparation:**
    - Boot from the Arch Linux live ISO in UEFI mode.
    - Connect to the Internet and verify your system prerequisites (keyboard layout, UEFI mode, NTP, etc.).

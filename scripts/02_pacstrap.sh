@@ -8,8 +8,8 @@ echo "Installing base system with pacstrap..."
 PACSTRAP_CMD="pacstrap -K /mnt base base-devel linux linux-firmware \
 git vim nvim btrfs-progs grub efibootmgr grub-btrfs inotify-tools timeshift \
 networkmanager pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber \
-reflector bash bash-completions bash-autosuggestions zsh zsh-completion \
-openssh man ${MICROCODE}"
+reflector bash bash-completion zsh-autosuggestions zsh-autocomplete zsh zsh-completions \
+networkmanager openssh man ${MICROCODE}"
 run_cmd "$PACSTRAP_CMD"
 
 echo "Generating fstab..."
